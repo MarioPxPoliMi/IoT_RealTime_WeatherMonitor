@@ -1,0 +1,197 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "38cda29c18d831dc",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2fbd60d9442de864",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "://thingspeak.com",
+        "port": "1883",
+        "clientid": "INSERISCI_QUI_IL_TUO_CLIENT_ID_THINGSPEAK",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "a6aef78e115dd360",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 200,
+        "wires": [
+            [
+                "32b82f1644ab9069"
+            ]
+        ]
+    },
+    {
+        "id": "32b82f1644ab9069",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "api.openweathermap.org/data/2.5/weather?q=Milano,it&APPID=INSERISCI_QUI_LA_TUA_API_KEY_OPENWEATHER",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 330,
+        "y": 200,
+        "wires": [
+            [
+                "1c6fd1628d7eff62"
+            ]
+        ]
+    },
+    {
+        "id": "1c6fd1628d7eff62",
+        "type": "json",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 510,
+        "y": 200,
+        "wires": [
+            [
+                "943bb92c08ac72b5"
+            ]
+        ]
+    },
+    {
+        "id": "943bb92c08ac72b5",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 1",
+        "func": "var data = msg.payload;\nvar tempK = data.main.temp;\nvar humidity = data.main.humidity;\nvar tempC = tempK - 273.15; // Conversione da Kelvin a Celsius\n\nmsg.payload = {\n    temperature: tempC,\n    humidity: humidity\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 200,
+        "wires": [
+            [
+                "ac6fbe8cadb6f54e"
+            ]
+        ]
+    },
+    {
+        "id": "5b5ec36e9320fec0",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "channels/INSERISCI_ID_CANALE_THINGSPEAK/publish",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "2fbd60d9442de864",
+        "x": 1090,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "ac6fbe8cadb6f54e",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 2",
+        "func": "var temperature = msg.payload.temperature;\nvar humidity = msg.payload.humidity;\n\nmsg.payload = \"field1=\" + temperature + \"&field2=\" + humidity;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 200,
+        "wires": [
+            [
+                "aab6f43f85c7a35d",
+                "5b5ec36e9320fec0"
+            ]
+        ]
+    },
+    {
+        "id": "aab6f43f85c7a35d",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 260,
+        "wires": []
+    }
+]
